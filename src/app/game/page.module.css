@@ -1,0 +1,63 @@
+.gameWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 60vh;
+    gap: var(--spacing-xl);
+}
+
+.status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--foreground-muted);
+    font-weight: 600;
+}
+
+.categoryBadge {
+    background: var(--surface);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+}
+
+.questionArea {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    flex: 1;
+    justify-content: center;
+}
+
+.turnLabel {
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.participantName {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.questionCard {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px solid var(--primary);
+    background: linear-gradient(135deg, #fff 0%, #f0f7ff 100%);
+}
+
+.questionText {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--foreground);
+}
+
+.actions {
+    margin-top: auto;
+}
