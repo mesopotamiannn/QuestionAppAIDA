@@ -30,11 +30,11 @@
 - [x] **Phase 4 完了時のGitコミットとバックアップ**
 
 ## Phase 5: PWA化と仕上げ
-- [ ] Service Worker の設定とオフライン動作確認
-- [ ] マニフェストファイルの設定
-- [ ] UI/UXのブラッシュアップ (インタラクション, デザイン詳細)
-- [ ] SEO設定 (Meta tags, OGP)
-- [ ] **Phase 5 完了時のGitコミットとバックアップ**
+- [x] Service Worker の設定とオフライン動作確認
+- [x] マニフェストファイルの設定
+- [x] UI/UXのブラッシュアップ (インタラクション, デザイン詳細)
+- [x] SEO設定 (Meta tags, OGP)
+- [x] **Phase 5 完了時のGitコミットとバックアップ**
 
 ## Phase 6: デプロイとテスト
 - [ ] Cloudflare Pages へのデプロイ設定

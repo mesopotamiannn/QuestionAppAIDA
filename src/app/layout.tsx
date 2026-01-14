@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google"; // Keep using sleek fonts
 import "@/styles/globals.css";
 
@@ -12,9 +12,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#275b91",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // user-scalable=no
+};
+
 export const metadata: Metadata = {
   title: "Question App",
   description: "会話促進型質問アプリ",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Question App",
+  },
 };
 
 export default function RootLayout({
