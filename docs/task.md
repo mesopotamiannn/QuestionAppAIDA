@@ -23,11 +23,11 @@
 - [x] **Phase 3 完了時のGitコミットとバックアップ**
 
 ## Phase 4: バックエンド連携と機能拡張
-- [ ] 質問投稿フォームの実装
-- [ ] Cloudflare Workers API の実装 (質問取得, 投稿)
-- [ ] データ同期機能の実装 (Server -> Client)
-- [ ] 18+ モードの制御実装
-- [ ] **Phase 4 完了時のGitコミットとバックアップ**
+- [x] 質問投稿フォームの実装
+- [x] Cloudflare Workers API の実装 (質問取得, 投稿)
+- [x] データ同期機能の実装 (Server -> Client)
+- [x] 18+ モードの制御実装
+- [x] **Phase 4 完了時のGitコミットとバックアップ**
 
 ## Phase 5: PWA化と仕上げ
 - [ ] Service Worker の設定とオフライン動作確認

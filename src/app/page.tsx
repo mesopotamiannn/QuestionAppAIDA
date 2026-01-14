@@ -11,12 +11,17 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { CATEGORIES } from '@/data/categories';
 import styles from './page.module.css';
 
+import { Modal } from '@/components/ui/Modal';
+import Link from 'next/link';
+
 export default function Home() {
   const router = useRouter();
   const { startSession, loading } = useGameSession();
   const [names, setNames] = useState<string[]>(['', '']);
-  const [categoryId, setCategoryId] = useState<string>('all'); // 'all' or specific ID
+  const [categoryId, setCategoryId] = useState<string>('all');
   const [count, setCount] = useState<number>(10);
+  const [is18Plus, setIs18Plus] = useState(false);
+  const [showAgeCheck, setShowAgeCheck] = useState(false);
 
   const handleNameChange = (index: number, value: string) => {
     const newNames = [...names];
@@ -35,8 +40,20 @@ export default function Home() {
     }
   };
 
+  const handle18PlusToggle = () => {
+    if (!is18Plus) {
+      setShowAgeCheck(true);
+    } else {
+      setIs18Plus(false);
+    }
+  };
+
+  const confirmAge = () => {
+    setIs18Plus(true);
+    setShowAgeCheck(false);
+  };
+
   const handleStart = async () => {
-    // Basic validation
     const validNames = names.filter(n => n.trim() !== '');
     if (validNames.length < 2) {
       alert('参加者を2人以上入力してください');
@@ -46,9 +63,9 @@ export default function Home() {
     const session = await startSession(
       validNames,
       categoryId,
-      count, // Fixed count for MVP
+      count,
       'interactive',
-      false // 18+ OFF
+      is18Plus
     );
 
     if (session) {
@@ -112,13 +129,45 @@ export default function Home() {
             </div>
           </section>
 
+          <section className={styles.section}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 className={styles.label}>18+ モード</h2>
+              <Button
+                variant={is18Plus ? 'primary' : 'secondary'}
+                size="small"
+                onClick={handle18PlusToggle}
+              >
+                {is18Plus ? 'ON' : 'OFF'}
+              </Button>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: '#666' }}>※ 刺激的な質問が含まれます</p>
+          </section>
+
           <div className={styles.action}>
             <Button fullWidth onClick={handleStart} disabled={loading}>
               {loading ? '準備中...' : 'スタート！'}
             </Button>
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <Link href="/submit" style={{ color: 'var(--primary)', fontSize: '0.9rem', textDecoration: 'underline' }}>
+              質問を投稿する
+            </Link>
+          </div>
         </div>
       </Container>
+
+      <Modal isOpen={showAgeCheck} onClose={() => setShowAgeCheck(false)}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>年齢確認</h3>
+        <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+          このモードには、成人向け（18歳以上）のトピックや刺激的な質問が含まれます。<br />
+          利用者は18歳以上ですか？また、他の参加者も同様ですか？
+        </p>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <Button variant="secondary" onClick={() => setShowAgeCheck(false)} fullWidth>いいえ</Button>
+          <Button variant="primary" onClick={confirmAge} fullWidth>はい (有効化)</Button>
+        </div>
+      </Modal>
     </>
   );
 }

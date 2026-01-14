@@ -32,10 +32,14 @@ export const useGameSession = () => {
                 questions = await getQuestionsByCategory(categoryId);
             }
 
-            // Filter 18+ if needed (future implementation)
+            // Filter 18+
+            const filtered = questions.filter(q => {
+                if (is18Plus) return true; // Show all
+                return q.rating === 'general'; // Show only general
+            });
 
             // Shuffle and Slice
-            const shuffled = questions.sort(() => 0.5 - Math.random());
+            const shuffled = filtered.sort(() => 0.5 - Math.random());
             const selected = shuffled.slice(0, questionCount);
 
             if (selected.length === 0) {
