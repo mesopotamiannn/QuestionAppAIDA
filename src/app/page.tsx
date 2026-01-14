@@ -1,4 +1,17 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { getAllQuestions } from '@/utils/db';
+
 export default function Home() {
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    getAllQuestions().then(questions => {
+      setCount(questions.length);
+    });
+  }, []);
+
   return (
     <div style={{
       display: 'flex',
@@ -12,6 +25,11 @@ export default function Home() {
         Question App
       </h1>
       <p>Setup Complete.</p>
+      {count !== null && (
+        <p style={{ color: 'var(--accent)' }}>
+          DB Initialized. Questions loaded: {count}
+        </p>
+      )}
     </div>
   );
 }

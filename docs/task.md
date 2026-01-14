@@ -8,11 +8,11 @@
 - [x] **Phase 1 完了時のGitコミットとバックアップ**
 
 ## Phase 2: データ設計と実装
-- [ ] IndexedDB ラッパーの実装 (idb使用)
-- [ ] データモデルの定義 (Question, Session, Participant)
-- [ ] Cloudflare D1 スキーマ定義 (マイグレーションファイル作成)
-- [ ] 初期データ (Seed) の作成 (各カテゴリの質問データ)
-- [ ] **Phase 2 完了時のGitコミットとバックアップ**
+- [x] IndexedDB ラッパーの実装 (idb使用)
+- [x] データモデルの定義 (Question, Session, Participant)
+- [x] Cloudflare D1 スキーマ定義 (マイグレーションファイル作成)
+- [x] 初期データ (Seed) の作成 (各カテゴリの質問データ)
+- [x] **Phase 2 完了時のGitコミットとバックアップ**
 
 ## Phase 3: コア機能実装 (フロントエンド)
 - [ ] 共通コンポーネントの作成 (Button, Card, Input, Layout)
