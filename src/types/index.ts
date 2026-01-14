@@ -34,5 +34,18 @@ export interface Session {
     currentQuestionIndex: number;
     currentParticipantIndex: number;
     is18Plus: boolean;
+    deepStartIndex: number; // Deep質問の開始位置
+    shownDeepWarning: boolean; // Deep前の警告を表示済みか
     createdAt: number;
 }
+
+// クライアント識別子の取得/生成
+export const getClientId = (): string => {
+    if (typeof window === 'undefined') return '';
+    let clientId = localStorage.getItem('clientId');
+    if (!clientId) {
+        clientId = crypto.randomUUID();
+        localStorage.setItem('clientId', clientId);
+    }
+    return clientId;
+};

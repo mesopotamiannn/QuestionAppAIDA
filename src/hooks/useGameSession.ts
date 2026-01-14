@@ -48,34 +48,53 @@ export const useGameSession = () => {
                 return true;
             });
 
-            // Shuffle and Slice
+            // Shuffle within depth groups, then sort by depth order
+            const depthOrder: Record<string, number> = { light: 0, normal: 1, deep: 2 };
             const shuffled = filtered.sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, questionCount);
+            const sorted = shuffled.sort((a, b) => depthOrder[a.depth] - depthOrder[b.depth]);
+            const selected = sorted.slice(0, questionCount);
 
             if (selected.length === 0) {
                 throw new Error('No questions found for selected categories.');
             }
 
+            // Calculate deepStartIndex
+            const deepStartIndex = selected.findIndex(q => q.depth === 'deep');
+
             const questionIds = selected.map(q => q.id);
 
-            // 2. Create Session Object
+            // 2. Auto-fill participant names
+            const autoFilledParticipants = participants.map((name, index) => {
+                if (name.trim() === '') {
+                    // 2人はA/B、3人以上は1/2/3...
+                    if (participants.length === 2) {
+                        return index === 0 ? 'Aさん' : 'Bさん';
+                    } else {
+                        return `${index + 1}さん`;
+                    }
+                }
+                return name;
+            });
+
+            // 3. Create Session Object
             const newSession: Session = {
                 id: crypto.randomUUID(),
-                participants: participants.map(name => ({ id: crypto.randomUUID(), name })),
+                participants: autoFilledParticipants.map(name => ({ id: crypto.randomUUID(), name })),
                 questionIds,
                 answerMode: mode,
                 currentQuestionIndex: 0,
                 currentParticipantIndex: 0,
                 is18Plus,
+                deepStartIndex: deepStartIndex === -1 ? -1 : deepStartIndex, // -1 = no deep questions
+                shownDeepWarning: false,
                 createdAt: Date.now(),
             };
 
-            // 3. Save to DB (Persistent session)
+            // 4. Save to DB (Persistent session)
             await saveSession(newSession);
 
-            // 4. Update State and Navigate
+            // 5. Update State and Navigate
             setSession(newSession);
-            // In a real app we might redirect here, but we'll let the component decide
             localStorage.setItem('currentSessionId', newSession.id);
 
             return newSession;
@@ -151,6 +170,14 @@ export const useGameSession = () => {
         }
     }, []);
 
+    // Mark deep warning as shown
+    const markDeepWarningShown = useCallback(async () => {
+        if (!session) return;
+        const updatedSession = { ...session, shownDeepWarning: true };
+        setSession(updatedSession);
+        await saveSession(updatedSession);
+    }, [session]);
+
     return {
         session,
         currentQuestion,
@@ -159,5 +186,6 @@ export const useGameSession = () => {
         startSession,
         nextQuestion,
         resumeSession,
+        markDeepWarningShown,
     };
 };

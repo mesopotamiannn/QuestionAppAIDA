@@ -208,7 +208,7 @@ export default function Home() {
         </p>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Button variant="secondary" onClick={() => setShowAgeCheck(false)} fullWidth>いいえ</Button>
-          <Button variant="primary" onClick={confirmAge} fullWidth>はい (有効化)</Button>
+          <Button variant="primary" onClick={confirmAge} fullWidth>はい</Button>
         </div>
       </Modal>
     </>

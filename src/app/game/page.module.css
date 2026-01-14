@@ -61,3 +61,26 @@
 .actions {
     margin-top: auto;
 }
+
+.likeButton {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-full);
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+.likeButton:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: rgba(39, 91, 145, 0.1);
+}
+
+.likeButton:disabled {
+    opacity: 0.7;
+    cursor: default;
+    background: rgba(39, 91, 145, 0.1);
+    border-color: var(--primary);
+}

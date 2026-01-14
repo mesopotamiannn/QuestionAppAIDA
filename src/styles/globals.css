@@ -51,8 +51,8 @@
 /* Adult (18+) Theme - Pink */
 [data-theme='adult'] {
   --primary-h: 340;
-  --primary-s: 82%;
-  --primary-l: 52%;
+  --primary-s: 100%;
+  --primary-l: 77%;
   --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
 
   --accent-h: 330;
@@ -61,8 +61,8 @@
   --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
 
   --background-h: 340;
-  --background-s: 15%;
-  --background-l: 97%;
+  --background-s: 38%;
+  --background-l: 92%;
   --background: hsl(var(--background-h), var(--background-s), var(--background-l));
 }
 

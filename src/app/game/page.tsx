@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { useGameSession } from '@/hooks/useGameSession';
+import { getClientId } from '@/types';
 import styles from './page.module.css';
 
 export default function GamePage() {
-    const { session, currentQuestion, resumeSession, nextQuestion, loading } = useGameSession();
+    const { session, currentQuestion, resumeSession, nextQuestion, markDeepWarningShown, loading } = useGameSession();
     const router = useRouter();
+    const [showDeepWarning, setShowDeepWarning] = useState(false);
+    const [liked, setLiked] = useState(false);
 
     useEffect(() => {
         const sessionId = localStorage.getItem('currentSessionId');
@@ -23,6 +27,39 @@ export default function GamePage() {
             resumeSession(sessionId);
         }
     }, [resumeSession, session, router]);
+
+    // Deep質問前のワンクッション表示判定
+    useEffect(() => {
+        if (session && !session.shownDeepWarning && session.deepStartIndex !== -1) {
+            if (session.currentQuestionIndex === session.deepStartIndex) {
+                setShowDeepWarning(true);
+            }
+        }
+    }, [session]);
+
+    // いいね状態のリセット（質問が変わったら）
+    useEffect(() => {
+        setLiked(false);
+    }, [currentQuestion?.id]);
+
+    const handleDeepContinue = async () => {
+        await markDeepWarningShown();
+        setShowDeepWarning(false);
+    };
+
+    const handleLike = async () => {
+        if (!currentQuestion || liked) return;
+        setLiked(true);
+        try {
+            await fetch(`/api/questions/${currentQuestion.id}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId: getClientId() }),
+            });
+        } catch (e) {
+            console.error('Like failed:', e);
+        }
+    };
 
     if (loading || !session || !currentQuestion) {
         return (
@@ -44,7 +81,7 @@ export default function GamePage() {
                             Q. {session.currentQuestionIndex + 1} / {session.questionIds.length}
                         </span>
                         <span className={styles.categoryBadge}>
-                            {currentQuestion.depth === 'deep' ? 'Deep' : 'Normal'}
+                            {currentQuestion.depth === 'deep' ? 'Deep' : currentQuestion.depth === 'light' ? 'Light' : 'Normal'}
                         </span>
                     </div>
 
@@ -56,6 +93,10 @@ export default function GamePage() {
                         <Card className={styles.questionCard}>
                             <p className={styles.questionText}>{currentQuestion.text}</p>
                         </Card>
+
+                        <button className={styles.likeButton} onClick={handleLike} disabled={liked}>
+                            {liked ? '👍 いいね！' : '👍'}
+                        </button>
                     </div>
 
                     <div className={styles.actions}>
@@ -65,6 +106,21 @@ export default function GamePage() {
                     </div>
                 </div>
             </Container>
+
+            {/* Deep質問前のワンクッションモーダル */}
+            <Modal isOpen={showDeepWarning}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center' }}>
+                    🌙 ここから少し深い質問です
+                </h3>
+                <div style={{ marginBottom: '1.5rem', lineHeight: '1.8', fontSize: '0.95rem' }}>
+                    <p>・無理に答えなくてOK</p>
+                    <p>・言いにくければスキップOK</p>
+                    <p>・相手が嫌がったら別の話題に</p>
+                </div>
+                <Button fullWidth onClick={handleDeepContinue}>
+                    OK、進む
+                </Button>
+            </Modal>
         </>
     );
 }

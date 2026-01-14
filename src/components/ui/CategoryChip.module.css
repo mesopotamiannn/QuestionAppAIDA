@@ -23,9 +23,9 @@
 }
 
 .adult {
-    border-color: hsl(340, 82%, 52%);
+    border-color: hsl(340, 100%, 77%);
 }
 
 .adult.selected {
-    background: hsl(340, 82%, 52%);
+    background: hsl(340, 100%, 77%);
 }
