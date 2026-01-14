@@ -1,0 +1,92 @@
+:root {
+  /* Color Palette - HSL */
+  /* Primary Blue: #275b91 -> 211, 58%, 36% */
+  --primary-h: 211;
+  --primary-s: 58%;
+  --primary-l: 36%;
+  --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  
+  /* Accent/Secondary: Lighter Blue */
+  --accent-h: 200;
+  --accent-s: 90%;
+  --accent-l: 60%;
+  --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+
+  /* Backgrounds */
+  --background-h: 210;
+  --background-s: 20%;
+  --background-l: 98%;
+  --background: hsl(var(--background-h), var(--background-s), var(--background-l));
+  
+  --surface-h: 0;
+  --surface-s: 0%;
+  --surface-l: 100%;
+  --surface: hsl(var(--surface-h), var(--surface-s), var(--surface-l));
+
+  /* Text */
+  --foreground-h: 211;
+  --foreground-s: 50%;
+  --foreground-l: 10%;
+  --foreground: hsl(var(--foreground-h), var(--foreground-s), var(--foreground-l));
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-h: 222;
+    --background-s: 40%;
+    --background-l: 10%;
+    
+    --surface-h: 222;
+    --surface-s: 30%;
+    --surface-l: 16%;
+    
+    --foreground-h: 210;
+    --foreground-s: 20%;
+    --foreground-l: 98%;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
