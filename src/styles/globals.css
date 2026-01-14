@@ -5,7 +5,7 @@
   --primary-s: 58%;
   --primary-l: 36%;
   --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
-  
+
   /* Accent/Secondary: Lighter Blue */
   --accent-h: 200;
   --accent-s: 90%;
@@ -17,7 +17,7 @@
   --background-s: 20%;
   --background-l: 98%;
   --background: hsl(var(--background-h), var(--background-s), var(--background-l));
-  
+
   --surface-h: 0;
   --surface-s: 0%;
   --surface-l: 100%;
@@ -41,11 +41,29 @@
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-full: 9999px;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Adult (18+) Theme - Pink */
+[data-theme='adult'] {
+  --primary-h: 340;
+  --primary-s: 82%;
+  --primary-l: 52%;
+  --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+
+  --accent-h: 330;
+  --accent-s: 90%;
+  --accent-l: 65%;
+  --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+
+  --background-h: 340;
+  --background-s: 15%;
+  --background-l: 97%;
+  --background: hsl(var(--background-h), var(--background-s), var(--background-l));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -53,11 +71,11 @@
     --background-h: 222;
     --background-s: 40%;
     --background-l: 10%;
-    
+
     --surface-h: 222;
     --surface-s: 30%;
     --surface-l: 16%;
-    
+
     --foreground-h: 210;
     --foreground-s: 20%;
     --foreground-l: 98%;

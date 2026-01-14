@@ -1,27 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
 import { Header } from '@/components/layout/Header';
 import { Container } from '@/components/layout/Container';
-import { useGameSession } from '@/hooks/useGameSession';
-import { CATEGORIES } from '@/data/categories';
-import styles from './page.module.css';
-
+import { CategoryChip } from '@/components/ui/CategoryChip';
 import { Modal } from '@/components/ui/Modal';
+import { useGameSession } from '@/hooks/useGameSession';
+import { CATEGORIES, ADULT_CATEGORY } from '@/data/categories';
 import Link from 'next/link';
+import styles from './page.module.css';
 
 export default function Home() {
   const router = useRouter();
   const { startSession, loading } = useGameSession();
   const [names, setNames] = useState<string[]>(['', '']);
-  const [categoryId, setCategoryId] = useState<string>('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [count, setCount] = useState<number>(10);
   const [is18Plus, setIs18Plus] = useState(false);
   const [showAgeCheck, setShowAgeCheck] = useState(false);
+
+  // テーマ切替
+  useEffect(() => {
+    if (is18Plus) {
+      document.documentElement.setAttribute('data-theme', 'adult');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      // 18+ OFF時はAdultカテゴリの選択を解除
+      setSelectedCategories(prev => prev.filter(id => id !== ADULT_CATEGORY.id));
+    }
+  }, [is18Plus]);
 
   const handleNameChange = (index: number, value: string) => {
     const newNames = [...names];
@@ -38,6 +48,22 @@ export default function Home() {
       const newNames = names.filter((_, i) => i !== index);
       setNames(newNames);
     }
+  };
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
+
+  const selectAllCategories = () => {
+    const allIds = CATEGORIES.map(c => c.id);
+    if (is18Plus) allIds.push(ADULT_CATEGORY.id);
+    setSelectedCategories(allIds);
+  };
+
+  const clearCategories = () => {
+    setSelectedCategories([]);
   };
 
   const handle18PlusToggle = () => {
@@ -62,7 +88,7 @@ export default function Home() {
 
     const session = await startSession(
       validNames,
-      categoryId,
+      selectedCategories, // 複数カテゴリ対応
       count,
       'interactive',
       is18Plus
@@ -100,17 +126,34 @@ export default function Home() {
           </section>
 
           <section className={styles.section}>
-            <h2 className={styles.label}>カテゴリ</h2>
-            <select
-              className={styles.select}
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
-              <option value="all">ランダム (全カテゴリ)</option>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h2 className={styles.label}>カテゴリ</h2>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button variant="ghost" size="small" onClick={selectAllCategories}>すべて</Button>
+                <Button variant="ghost" size="small" onClick={clearCategories}>クリア</Button>
+              </div>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.75rem' }}>
+              ※ 未選択の場合は全カテゴリから出題
+            </p>
+            <div className={styles.chipGrid}>
               {CATEGORIES.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <CategoryChip
+                  key={c.id}
+                  label={c.name}
+                  selected={selectedCategories.includes(c.id)}
+                  onClick={() => toggleCategory(c.id)}
+                />
               ))}
-            </select>
+              {is18Plus && (
+                <CategoryChip
+                  label={ADULT_CATEGORY.name}
+                  selected={selectedCategories.includes(ADULT_CATEGORY.id)}
+                  isAdult
+                  onClick={() => toggleCategory(ADULT_CATEGORY.id)}
+                />
+              )}
+            </div>
           </section>
 
           <section className={styles.section}>

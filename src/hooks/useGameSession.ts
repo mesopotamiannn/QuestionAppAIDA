@@ -17,7 +17,7 @@ export const useGameSession = () => {
     // Initialize a new session
     const startSession = useCallback(async (
         participants: string[],
-        categoryId: string,
+        categoryIds: string[], // 複数カテゴリ対応
         questionCount: number,
         mode: AnswerMode,
         is18Plus: boolean
@@ -26,16 +26,26 @@ export const useGameSession = () => {
         try {
             // 1. Fetch Questions
             let questions: Question[] = [];
-            if (categoryId === 'all') { // If we want to support 'all'
+
+            if (categoryIds.length === 0) {
+                // 未選択 = 全カテゴリ（Adult除く）
                 questions = await getAllQuestions();
+                questions = questions.filter(q => q.rating === 'general');
             } else {
-                questions = await getQuestionsByCategory(categoryId);
+                // 選択されたカテゴリから取得
+                const questionSets = await Promise.all(
+                    categoryIds.map(id => getQuestionsByCategory(id))
+                );
+                questions = questionSets.flat();
             }
 
-            // Filter 18+
+            // Filter by rating
             const filtered = questions.filter(q => {
-                if (is18Plus) return true; // Show all
-                return q.rating === 'general'; // Show only general
+                // Adult質問はadultカテゴリが選択されている場合のみ
+                if (q.rating === 'adult') {
+                    return categoryIds.includes('adult');
+                }
+                return true;
             });
 
             // Shuffle and Slice
@@ -43,7 +53,7 @@ export const useGameSession = () => {
             const selected = shuffled.slice(0, questionCount);
 
             if (selected.length === 0) {
-                throw new Error('No questions found for this category.');
+                throw new Error('No questions found for selected categories.');
             }
 
             const questionIds = selected.map(q => q.id);

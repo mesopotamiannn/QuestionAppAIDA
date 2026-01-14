@@ -1,0 +1,31 @@
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: var(--surface);
+    color: var(--foreground);
+}
+
+.chip:hover {
+    border-color: var(--primary);
+}
+
+.selected {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.adult {
+    border-color: hsl(340, 82%, 52%);
+}
+
+.adult.selected {
+    background: hsl(340, 82%, 52%);
+}

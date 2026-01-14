@@ -1,5 +1,6 @@
 import { Category } from '@/types';
 
+// 通常カテゴリ (12個)
 export const CATEGORIES: Category[] = [
     { id: '1', name: '自己紹介', description: '基本情報や性格について' },
     { id: '2', name: '趣味・休日', description: '好きなことや過ごし方' },
@@ -14,3 +15,11 @@ export const CATEGORIES: Category[] = [
     { id: '11', name: '将来・夢', description: 'これからの目標や夢' },
     { id: '12', name: '内面・深掘り', description: '普段話さない深い話' },
 ];
+
+// 18+カテゴリ (13番目)
+export const ADULT_CATEGORY: Category = {
+    id: 'adult',
+    name: '大人の質問（18+）',
+    description: '成人向けの刺激的な質問',
+};
+

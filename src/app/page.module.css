@@ -50,6 +50,12 @@
     gap: var(--spacing-sm);
 }
 
+.chipGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
 .action {
     margin-top: var(--spacing-lg);
 }

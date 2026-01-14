@@ -4,13 +4,14 @@ const createQuestion = (
     id: string,
     categoryId: string,
     text: string,
-    depth: Question['depth'] = 'normal'
+    depth: Question['depth'] = 'normal',
+    rating: Question['rating'] = 'general'
 ): Question => ({
     id,
     categoryId,
     text,
     depth,
-    rating: 'general',
+    rating,
     status: 'approved',
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -38,4 +39,9 @@ export const INITIAL_QUESTIONS: Question[] = [
     // 10. 恋愛観
     createQuestion('q10_1', '10', '初デートで行きたい場所は？', 'light'),
     createQuestion('q10_2', '10', 'パートナーに求める一番の条件は？', 'normal'),
+
+    // 13. 大人の質問（18+）
+    createQuestion('qa_1', 'adult', '理想のキスシチュエーションは？', 'normal', 'adult'),
+    createQuestion('qa_2', 'adult', '異性の好みのタイプを具体的に教えて', 'light', 'adult'),
+    createQuestion('qa_3', 'adult', '恋愛で一番ドキドキした瞬間は？', 'normal', 'adult'),
 ];
