@@ -1,0 +1,8 @@
+name = "question-app"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "question-app-db"
+database_id = "9de20edf-e444-406e-9ea2-578b4b02c431"

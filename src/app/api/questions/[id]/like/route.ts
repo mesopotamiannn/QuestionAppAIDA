@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
-// In-memory storage for likes (D1の代わり。本番はD1へ移行)
-const likes: Map<string, Set<string>> = new Map();
+export const runtime = 'edge';
 
 export async function POST(
     request: Request,
@@ -9,28 +9,40 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const body = await request.json();
+        const body = (await request.json()) as { clientId: string };
         const { clientId } = body;
 
         if (!clientId) {
             return NextResponse.json({ error: 'clientId is required' }, { status: 400 });
         }
 
-        // いいね登録（重複チェック）
-        if (!likes.has(id)) {
-            likes.set(id, new Set());
-        }
+        const { env } = getRequestContext();
+        const db = env.DB;
 
-        const questionLikes = likes.get(id)!;
-        if (questionLikes.has(clientId)) {
-            // 既にいいね済み
+        // Check if already liked (using composite primary key constraint will throw if duplicate, 
+        // but we can check existence first for cleaner response)
+        const existing = await db.prepare(
+            'SELECT 1 FROM question_likes WHERE question_id = ? AND client_id = ?'
+        ).bind(id, clientId).first();
+
+        if (existing) {
             return NextResponse.json({ success: true, alreadyLiked: true });
         }
 
-        questionLikes.add(clientId);
+        // Insert like
+        await db.prepare(
+            'INSERT INTO question_likes (question_id, client_id, created_at) VALUES (?, ?, ?)'
+        ).bind(id, clientId, Date.now()).run();
 
-        return NextResponse.json({ success: true, likeCount: questionLikes.size });
+        // Get new count
+        const countResult = await db.prepare(
+            'SELECT COUNT(*) as count FROM question_likes WHERE question_id = ?'
+        ).bind(id).first<{ count: number }>();
+
+        return NextResponse.json({ success: true, likeCount: countResult?.count || 0 });
+
     } catch (error) {
+        console.error('Like API Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -39,7 +51,18 @@ export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
-    const questionLikes = likes.get(id);
-    return NextResponse.json({ likeCount: questionLikes?.size || 0 });
+    try {
+        const { id } = await params;
+        const { env } = getRequestContext();
+        const db = env.DB;
+
+        const countResult = await db.prepare(
+            'SELECT COUNT(*) as count FROM question_likes WHERE question_id = ?'
+        ).bind(id).first<{ count: number }>();
+
+        return NextResponse.json({ likeCount: countResult?.count || 0 });
+    } catch (error) {
+        console.error('Like GET Error:', error);
+        return NextResponse.json({ likeCount: 0 });
+    }
 }
