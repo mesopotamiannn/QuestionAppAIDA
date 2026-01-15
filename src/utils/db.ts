@@ -15,24 +15,27 @@ interface QuestionAppDB extends DBSchema {
 }
 
 const DB_NAME = 'question-app-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Bump version to trigger upgrade for new questions
 
 let dbPromise: Promise<IDBPDatabase<QuestionAppDB>>;
 
 export const initDB = () => {
     if (!dbPromise) {
         dbPromise = openDB<QuestionAppDB>(DB_NAME, DB_VERSION, {
-            upgrade(db) {
+            upgrade(db, oldVersion, newVersion, transaction) {
                 // Questions Store
                 if (!db.objectStoreNames.contains('questions')) {
                     const questionStore = db.createObjectStore('questions', { keyPath: 'id' });
                     questionStore.createIndex('by-category', 'categoryId');
-
-                    // Seed initial data
-                    INITIAL_QUESTIONS.forEach(question => {
-                        questionStore.put(question);
-                    });
                 }
+
+                // Re-seed data if upgrading or creating (Simple approach: overwrite existing seed data)
+                // Note: In production, we should be careful not to overwrite user data if any.
+                // For this app, questions are static locally, so re-seeding is fine.
+                const questionStore = transaction.objectStore('questions');
+                INITIAL_QUESTIONS.forEach(question => {
+                    questionStore.put(question);
+                });
 
                 // Sessions Store
                 if (!db.objectStoreNames.contains('sessions')) {

@@ -131,20 +131,49 @@ export const useGameSession = () => {
     const nextQuestion = useCallback(async () => {
         if (!session) return;
 
-        const nextIndex = session.currentQuestionIndex + 1;
+        let nextQuestionIndex = session.currentQuestionIndex;
+        let nextParticipantIndex = session.currentParticipantIndex;
 
-        if (nextIndex >= session.questionIds.length) {
+        if (session.answerMode === 'everyone') {
+            // Everyone mode: Rotate participant, then question if all answered
+            // Logic: 
+            // - Increment participant index loopingly
+            // - If we loop back to the first participant for this question, move to next question
+
+            // NOTE: currentParticipantIndex points to WHOSE TURN IT IS.
+            // When they click Next, it means they finished.
+
+            // Check if this was the last participant for the current question
+            // In a simple round-robin starting from 0:
+            // 0 -> 1 -> ... -> last -> 0 (next question)
+            // But we might want to rotate who starts. Use simple logic first:
+            // 0 -> 1 -> ... -> last -> Next Q + Participant 0
+
+            const isLastParticipant = nextParticipantIndex === session.participants.length - 1;
+
+            if (isLastParticipant) {
+                // All answered this question -> Next Question
+                nextQuestionIndex++;
+                nextParticipantIndex = 0; // Reset to first participant for new question
+            } else {
+                // Next participant for same question
+                nextParticipantIndex++;
+            }
+        } else {
+            // Interactive mode (Default): New Question + Next Participant
+            nextQuestionIndex++;
+            nextParticipantIndex = (session.currentParticipantIndex + 1) % session.participants.length;
+        }
+
+        if (nextQuestionIndex >= session.questionIds.length) {
             // Game Over
             router.push('/result');
             return;
         }
 
-        // Rotate participant
-        const nextParticipantIndex = (session.currentParticipantIndex + 1) % session.participants.length;
-
         const updatedSession = {
             ...session,
-            currentQuestionIndex: nextIndex,
+            currentQuestionIndex: nextQuestionIndex,
             currentParticipantIndex: nextParticipantIndex
         };
 

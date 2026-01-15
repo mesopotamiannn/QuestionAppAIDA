@@ -39,9 +39,17 @@ export const INITIAL_QUESTIONS: Question[] = [
     // 10. 恋愛観
     createQuestion('q10_1', '10', '初デートで行きたい場所は？', 'light'),
     createQuestion('q10_2', '10', 'パートナーに求める一番の条件は？', 'normal'),
+    createQuestion('q10_3', '10', 'パートナーに求める？', 'normal'),
 
     // 13. 大人の質問（18+）
-    createQuestion('qa_1', 'adult', '理想のキスシチュエーションは？', 'normal', 'adult'),
+    createQuestion('qa_1', 'adult', '理想のキスシチュエーションは？', 'light', 'adult'),
     createQuestion('qa_2', 'adult', '異性の好みのタイプを具体的に教えて', 'light', 'adult'),
-    createQuestion('qa_3', 'adult', '恋愛で一番ドキドキした瞬間は？', 'normal', 'adult'),
+    createQuestion('qa_3', 'adult', '初体験の年齢は？そのシュチュエーションは？', 'deep', 'adult'),
+    createQuestion('qa_4', 'adult', '今まで一番興奮したエッチのシュチュエーションは？', 'deep', 'adult'),
+    createQuestion('qa_5', 'adult', '好きな体位は？理由も教えて', 'deep', 'adult'),
+    createQuestion('qa_6', 'adult', '体の関係になれるのは何回目のデート？', 'deep', 'adult'),
+    createQuestion('qa_7', 'adult', '異性のここに性的魅力を感じる？', 'normal', 'adult'),
+    createQuestion('qa_8', 'adult', '恋愛で一番ドキドキした瞬間は？', 'normal', 'adult'),
+
+
 ];

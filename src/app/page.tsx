@@ -13,6 +13,8 @@ import { CATEGORIES, ADULT_CATEGORY } from '@/data/categories';
 import Link from 'next/link';
 import styles from './page.module.css';
 
+import { AnswerMode } from '@/types'; // AnswerMode type
+
 export default function Home() {
   const router = useRouter();
   const { startSession, loading } = useGameSession();
@@ -21,14 +23,29 @@ export default function Home() {
   const [count, setCount] = useState<number>(10);
   const [is18Plus, setIs18Plus] = useState(false);
   const [showAgeCheck, setShowAgeCheck] = useState(false);
+  const [answerMode, setAnswerMode] = useState<AnswerMode>('everyone'); // Default to everyone
 
-  // テーマ切替
+  // Load persistence
+  useEffect(() => {
+    const savedNames = localStorage.getItem('lastParticipants');
+    if (savedNames) {
+      try {
+        const parsed = JSON.parse(savedNames);
+        if (Array.isArray(parsed) && parsed.length >= 2) {
+          setNames(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to parse saved names', e);
+      }
+    }
+  }, []);
+
+  // Theme switch
   useEffect(() => {
     if (is18Plus) {
       document.documentElement.setAttribute('data-theme', 'adult');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      // 18+ OFF時はAdultカテゴリの選択を解除
       setSelectedCategories(prev => prev.filter(id => id !== ADULT_CATEGORY.id));
     }
   }, [is18Plus]);
@@ -80,17 +97,22 @@ export default function Home() {
   };
 
   const handleStart = async () => {
-    const validNames = names.filter(n => n.trim() !== '');
-    if (validNames.length < 2) {
-      alert('参加者を2人以上入力してください');
+    if (names.length < 2) {
+      alert('参加者を2人以上設定してください');
       return;
     }
 
+    // Save names logic
+    localStorage.setItem('lastParticipants', JSON.stringify(names));
+
+    // Force 'everyone' if participants > 2 (though UI hides option)
+    const finalMode = names.length > 2 ? 'everyone' : answerMode;
+
     const session = await startSession(
-      validNames,
-      selectedCategories, // 複数カテゴリ対応
+      names,
+      selectedCategories,
       count,
-      'interactive',
+      finalMode,
       is18Plus
     );
 
@@ -124,6 +146,33 @@ export default function Home() {
               )}
             </div>
           </section>
+
+          {names.length === 2 && (
+            <section className={styles.section}>
+              <h2 className={styles.label}>回答順モード</h2>
+              <div className={styles.countOptions}>
+                <Button
+                  variant={answerMode === 'everyone' ? 'primary' : 'secondary'}
+                  onClick={() => setAnswerMode('everyone')}
+                  style={{ flex: 1 }}
+                  size="small"
+                >
+                  全員回答
+                </Button>
+                <Button
+                  variant={answerMode === 'interactive' ? 'primary' : 'secondary'}
+                  onClick={() => setAnswerMode('interactive')}
+                  style={{ flex: 1 }}
+                  size="small"
+                >
+                  交互に回答
+                </Button>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
+                {answerMode === 'everyone' ? '1つの質問に全員が答えてから次へ進みます' : '1問ごとに回答者が交代します'}
+              </p>
+            </section>
+          )}
 
           <section className={styles.section}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
