@@ -78,9 +78,44 @@ export async function POST(req) {
 
 ## 手順 5: デプロイ
 
-設定とコード修正が完了したら、Cloudflare Pages にデプロイします。
+### 方法 A: Cloudflare Git Integration (推奨)
 
+Windows環境では `next-on-pages` のローカルビルドがエラーになる場合が多いため、GitHub経由のデプロイを推奨します。
+
+1. **GitHubにコードをプッシュ**
+   このプロジェクトをGitHubのリポジトリにプッシュします。
+
+2. **Cloudflare Pagesと連携**
+   - Cloudflareダッシュボード > Pages > Connect to Git
+   - リポジトリを選択
+   - **Build Settings (ビルド設定)**:
+     - **Framework preset**: Next.js (Static HTML Export) ではなく **None** を選択する場合もありますが、通常はフレームワーク自動検出に任せるか、以下を手動設定します：
+     - **Build command**: `npx @cloudflare/next-on-pages`
+     - **Build output directory**: `.vercel/output/static`
+     - **Environment Variables (環境変数)**:
+       - `NODE_VERSION`: `20` (または使用しているバージョン)
+
+3. **D1データベースのバインディング**
+   デプロイプロジェクトが作成されたら、Settings > Functions > D1 Database Bindings で以下を設定します：
+   - Variable name: `DB`
+   - D1 Database: `question-app-db`
+
+4. **再デプロイ**
+   設定後、Retry deployment を行うと、クラウド上でビルドが実行され、D1と連携したアプリが公開されます。
+
+### 方法 B: ローカルビルド (Windowsでの注意点)
+
+`npm run pages:build` が `Unexpected error` (文字化け等) で失敗する場合、Windowsの文字コード設定などが原因の可能性があります。
+
+**対策:**
+ターミナルで文字コードを UTF-8 に変更してから実行してみてください。
 ```bash
+chcp 65001
 npm run pages:build
+```
+それでも失敗する場合は、上記 **「方法 A」** を利用してください。
+
+ビルドが成功した場合のみ、以下・ﾅデプロイ可能です：
+```bash
 npx wrangler pages deploy .vercel/output/static
 ```
