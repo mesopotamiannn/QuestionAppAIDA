@@ -16,13 +16,22 @@ export async function POST(
             return NextResponse.json({ error: 'clientId is required' }, { status: 400 });
         }
 
-        const { env } = getRequestContext();
-        const db = env.DB;
+        const ctx = getRequestContext();
+        if (!ctx) {
+            return NextResponse.json({ error: 'RequestContext is null', step: 'getRequestContext' }, { status: 500 });
+        }
 
+        const env = ctx.env;
+        if (!env) {
+            return NextResponse.json({ error: 'env is null', step: 'getEnv' }, { status: 500 });
+        }
+
+        const db = env.DB;
         if (!db) {
             return NextResponse.json({
-                error: 'Database not found',
-                details: 'D1 binding (DB) is missing. Please check Cloudflare Pages settings.'
+                error: 'DB binding not found',
+                step: 'getDB',
+                details: 'Please ensure D1 binding "DB" is set in Cloudflare dashboard.'
             }, { status: 500 });
         }
 
