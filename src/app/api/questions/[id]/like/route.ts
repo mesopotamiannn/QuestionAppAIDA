@@ -19,6 +19,13 @@ export async function POST(
         const { env } = getRequestContext();
         const db = env.DB;
 
+        if (!db) {
+            return NextResponse.json({
+                error: 'Database not found',
+                details: 'D1 binding (DB) is missing. Please check Cloudflare Pages settings.'
+            }, { status: 500 });
+        }
+
         // Check if already liked (using composite primary key constraint will throw if duplicate, 
         // but we can check existence first for cleaner response)
         const existing = await db.prepare(

@@ -9,12 +9,18 @@ export async function GET() {
     try {
         const { env } = getRequestContext();
         const db = env.DB;
+        if (!db) {
+            return NextResponse.json({
+                error: 'Database not found',
+                details: 'D1 binding (DB) is missing in Cloudflare Pages settings.'
+            }, { status: 500 });
+        }
         const { results } = await db.prepare('SELECT * FROM questions ORDER BY created_at DESC').all<Question>();
         return NextResponse.json(results);
     } catch (e) {
         console.error('Fetch API Error:', e);
         const msg = e instanceof Error ? e.message : String(e);
-        return NextResponse.json({ error: 'Failed to fetch questions', details: msg }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error', details: msg }, { status: 500 });
     }
 }
 
@@ -36,6 +42,12 @@ export async function POST(request: Request) {
 
         const { env } = getRequestContext();
         const db = env.DB;
+        if (!db) {
+            return NextResponse.json({
+                error: 'Database not found',
+                details: 'D1 binding (DB) is missing. Please check Cloudflare Pages settings.'
+            }, { status: 500 });
+        }
         const id = `q_${Date.now()}`;
         const now = Date.now();
 
