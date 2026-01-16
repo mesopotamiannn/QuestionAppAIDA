@@ -18,25 +18,41 @@ export default function SubmitPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!text.trim()) return;
+        const trimmedText = text.trim();
+        if (!trimmedText) return;
 
         setIsSubmitting(true);
         try {
+            // Get or create client ID
+            let clientId = localStorage.getItem('question_app_client_id');
+            if (!clientId) {
+                clientId = `c_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+                localStorage.setItem('question_app_client_id', clientId);
+            }
+
             const res = await fetch('/api/questions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryId, text, depth }),
+                body: JSON.stringify({
+                    categoryId,
+                    text: trimmedText,
+                    depth,
+                    clientId
+                }),
             });
+
+            const data = (await res.json()) as any;
 
             if (res.ok) {
                 setSuccess(true);
                 setText('');
                 setTimeout(() => setSuccess(false), 3000);
             } else {
-                alert('送信に失敗しました');
+                // Specific error from API
+                alert(data.error || '送信に失敗しました');
             }
         } catch (error) {
-            alert('エラーが発生しました');
+            alert('通信エラーが発生しました');
         } finally {
             setIsSubmitting(false);
         }

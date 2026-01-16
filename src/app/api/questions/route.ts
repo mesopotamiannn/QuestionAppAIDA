@@ -45,6 +45,12 @@ export async function GET() {
 // POST: Submit question
 export async function POST(request: Request) {
     try {
+        const ctx = getRequestContext();
+        const db = ctx?.env?.DB;
+        if (!db) {
+            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), { status: 500 });
+        }
+
         let body: any;
         try {
             body = await request.json();
@@ -52,34 +58,41 @@ export async function POST(request: Request) {
             return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
         }
 
-        const { categoryId, text, depth } = body;
+        const { categoryId, text, depth, clientId } = body;
+        const ip = request.headers.get('cf-connecting-ip') || 'unknown';
 
         // Validation: 必須チェック
         if (!categoryId || !text) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+            return new Response(JSON.stringify({ error: '必須項目が不足しています' }), { status: 400 });
         }
 
         // Validation: 文字数制限 (5〜100文字)
         const trimmedText = text.trim();
         if (trimmedText.length < 5) {
-            return new Response(JSON.stringify({ error: 'Question is too short (min 5 characters)' }), { status: 400 });
+            return new Response(JSON.stringify({ error: '5文字以上入力してください' }), { status: 400 });
         }
         if (trimmedText.length > 100) {
-            return new Response(JSON.stringify({ error: 'Question is too long (max 100 characters)' }), { status: 400 });
+            return new Response(JSON.stringify({ error: '入力内容が長すぎます（100文字以内）' }), { status: 400 });
         }
 
-        const ctx = getRequestContext();
-        const db = ctx?.env?.DB;
-        if (!db) {
-            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), { status: 500 });
+        // Rate Limit Check (10 minutes)
+        const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+        const recentPost = await db.prepare(
+            'SELECT 1 FROM questions WHERE (author_id = ? OR ip_address = ?) AND created_at > ? LIMIT 1'
+        ).bind(clientId || 'guest', ip, tenMinutesAgo).first();
+
+        if (recentPost) {
+            return new Response(JSON.stringify({
+                error: '投稿間隔が短すぎます。しばらく時間を置いて（約10分）再度お試しください。'
+            }), { status: 429 });
         }
 
         const id = `q_${Date.now()}`;
         const now = Date.now();
 
         await db.prepare(
-            `INSERT INTO questions (id, category_id, text, depth, rating, status, created_at, updated_at) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT INTO questions (id, category_id, text, depth, rating, status, author_id, ip_address, created_at, updated_at) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         ).bind(
             id,
             categoryId,
@@ -87,6 +100,8 @@ export async function POST(request: Request) {
             depth || 'normal',
             'general',
             'pending',
+            clientId || 'guest',
+            ip,
             now,
             now
         ).run();
