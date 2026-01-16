@@ -1,78 +1,69 @@
-import { NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
-import { Question } from '@/types';
 
 export const runtime = 'edge';
 
-// GET: List questions (e.g. for admin or sync)
+// ヘルパー：スネークケースのオブジェクトをキャメルケースに変換
+function toCamelCase(obj: any) {
+    const newObj: any = {};
+    for (const key in obj) {
+        const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+        newObj[camelKey] = obj[key];
+    }
+    return newObj;
+}
+
+// GET: List questions
 export async function GET() {
     try {
         const ctx = getRequestContext();
-        if (!ctx) {
-            return new Response(JSON.stringify({ error: 'RequestContext is null', step: 'getRequestContext' }), { status: 500 });
-        }
-
-        const env = ctx.env;
-        if (!env) {
-            return new Response(JSON.stringify({ error: 'env is null', step: 'getEnv' }), { status: 500 });
-        }
-
-        const db = env.DB;
+        const db = ctx?.env?.DB;
         if (!db) {
-            return new Response(JSON.stringify({
-                error: 'DB binding not found',
-                step: 'getDB',
-                details: 'Please ensure D1 binding "DB" is set in Cloudflare dashboard.'
-            }), { status: 500 });
+            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
-        const { results } = await db.prepare('SELECT * FROM questions ORDER BY created_at DESC').all<Question>();
-        return NextResponse.json(results);
+        const { results } = await db.prepare('SELECT * FROM questions ORDER BY created_at DESC').all();
+        const camelResults = (results || []).map(toCamelCase);
+
+        return new Response(JSON.stringify(camelResults), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
     } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        return new Response(JSON.stringify({ error: 'Exception occurred', details: msg }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'GET API Error', details: msg }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }
 
-interface SubmitBody {
-    categoryId: string;
-    text: string;
-    depth?: Question['depth'];
-}
-
+// POST: Submit question
 export async function POST(request: Request) {
     try {
-        const body = (await request.json()) as SubmitBody;
-        const { categoryId, text, depth } = body;
+        let body: any;
+        try {
+            body = await request.json();
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+        }
 
-        // Validation
+        const { categoryId, text, depth } = body;
         if (!categoryId || !text) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
         }
 
         const ctx = getRequestContext();
-        if (!ctx) {
-            return new Response(JSON.stringify({ error: 'RequestContext is null', step: 'getRequestContext' }), { status: 500 });
-        }
-
-        const env = ctx.env;
-        if (!env) {
-            return new Response(JSON.stringify({ error: 'env is null', step: 'getEnv' }), { status: 500 });
-        }
-
-        const db = env.DB;
+        const db = ctx?.env?.DB;
         if (!db) {
-            return new Response(JSON.stringify({
-                error: 'DB binding not found',
-                step: 'getDB',
-                details: 'Please ensure D1 binding "DB" is set in Cloudflare dashboard.'
-            }), { status: 500 });
+            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), { status: 500 });
         }
 
         const id = `q_${Date.now()}`;
         const now = Date.now();
 
-        // Insert into D1
         await db.prepare(
             `INSERT INTO questions (id, category_id, text, depth, rating, status, created_at, updated_at) 
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
@@ -87,7 +78,7 @@ export async function POST(request: Request) {
             now
         ).run();
 
-        const newQuestion: Question = {
+        const newQuestion = {
             id,
             categoryId,
             text,
@@ -98,9 +89,15 @@ export async function POST(request: Request) {
             updatedAt: now,
         };
 
-        return NextResponse.json(newQuestion);
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        return new Response(JSON.stringify({ error: 'Exception occurred', details: msg }), { status: 500 });
+        return new Response(JSON.stringify(newQuestion), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return new Response(JSON.stringify({ error: 'POST API Error', details: msg }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
 }

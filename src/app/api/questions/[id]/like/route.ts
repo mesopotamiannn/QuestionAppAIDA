@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
@@ -9,58 +8,45 @@ export async function POST(
 ) {
     try {
         const { id } = await params;
-        const body = (await request.json()) as { clientId: string };
+        let body: any;
+        try {
+            body = await request.json();
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+        }
         const { clientId } = body;
 
         if (!clientId) {
-            return NextResponse.json({ error: 'clientId is required' }, { status: 400 });
+            return new Response(JSON.stringify({ error: 'clientId is required' }), { status: 400 });
         }
 
         const ctx = getRequestContext();
-        if (!ctx) {
-            return NextResponse.json({ error: 'RequestContext is null', step: 'getRequestContext' }, { status: 500 });
-        }
-
-        const env = ctx.env;
-        if (!env) {
-            return NextResponse.json({ error: 'env is null', step: 'getEnv' }, { status: 500 });
-        }
-
-        const db = env.DB;
+        const db = ctx?.env?.DB;
         if (!db) {
-            return NextResponse.json({
-                error: 'DB binding not found',
-                step: 'getDB',
-                details: 'Please ensure D1 binding "DB" is set in Cloudflare dashboard.'
-            }, { status: 500 });
+            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), { status: 500 });
         }
 
-        // Check if already liked (using composite primary key constraint will throw if duplicate, 
-        // but we can check existence first for cleaner response)
         const existing = await db.prepare(
             'SELECT 1 FROM question_likes WHERE question_id = ? AND client_id = ?'
         ).bind(id, clientId).first();
 
         if (existing) {
-            return NextResponse.json({ success: true, alreadyLiked: true });
+            return new Response(JSON.stringify({ success: true, alreadyLiked: true }), { status: 200 });
         }
 
-        // Insert like
         await db.prepare(
             'INSERT INTO question_likes (question_id, client_id, created_at) VALUES (?, ?, ?)'
         ).bind(id, clientId, Date.now()).run();
 
-        // Get new count
         const countResult = await db.prepare(
             'SELECT COUNT(*) as count FROM question_likes WHERE question_id = ?'
         ).bind(id).first<{ count: number }>();
 
-        return NextResponse.json({ success: true, likeCount: countResult?.count || 0 });
+        return new Response(JSON.stringify({ success: true, likeCount: countResult?.count || 0 }), { status: 200 });
 
     } catch (error) {
-        console.error('Like API Error:', error);
         const msg = error instanceof Error ? error.message : String(error);
-        return NextResponse.json({ error: 'Internal Server Error', details: msg }, { status: 500 });
+        return new Response(JSON.stringify({ error: 'Like POST Error', details: msg }), { status: 500 });
     }
 }
 
@@ -70,16 +56,18 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const { env } = getRequestContext();
-        const db = env.DB;
+        const ctx = getRequestContext();
+        const db = ctx?.env?.DB;
+        if (!db) {
+            return new Response(JSON.stringify({ error: 'Database binding "DB" not found' }), { status: 500 });
+        }
 
         const countResult = await db.prepare(
             'SELECT COUNT(*) as count FROM question_likes WHERE question_id = ?'
         ).bind(id).first<{ count: number }>();
 
-        return NextResponse.json({ likeCount: countResult?.count || 0 });
+        return new Response(JSON.stringify({ likeCount: countResult?.count || 0 }), { status: 200 });
     } catch (error) {
-        console.error('Like GET Error:', error);
-        return NextResponse.json({ likeCount: 0 });
+        return new Response(JSON.stringify({ likeCount: 0 }), { status: 200 });
     }
 }
