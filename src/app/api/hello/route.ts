@@ -30,7 +30,7 @@ export async function GET() {
         }
 
         return new Response(JSON.stringify({
-            message: "Hello from Edge Runtime!",
+            message: "Diagnostic API (Updated at 12:47 AM)",
             hasCtx: !!ctx,
             envKeys: ctx?.env ? Object.keys(ctx.env) : [],
             dbStatus,
