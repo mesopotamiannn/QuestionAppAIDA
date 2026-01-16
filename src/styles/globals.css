@@ -66,21 +66,6 @@
   --background: hsl(var(--background-h), var(--background-s), var(--background-l));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-h: 222;
-    --background-s: 40%;
-    --background-l: 10%;
-
-    --surface-h: 222;
-    --surface-s: 30%;
-    --surface-l: 16%;
-
-    --foreground-h: 210;
-    --foreground-s: 20%;
-    --foreground-l: 98%;
-  }
-}
 
 * {
   box-sizing: border-box;
