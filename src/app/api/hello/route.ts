@@ -5,10 +5,27 @@ export const runtime = 'edge';
 export async function GET() {
     try {
         const ctx = getRequestContext();
+        const db = ctx?.env?.DB;
+
+        let dbStatus = "Not Attempted";
+        let dbError = null;
+
+        if (db) {
+            try {
+                const res = await db.prepare('SELECT 1').first();
+                dbStatus = res ? "Success" : "Empty Result";
+            } catch (e) {
+                dbStatus = "Failed";
+                dbError = e instanceof Error ? e.message : String(e);
+            }
+        }
+
         return new Response(JSON.stringify({
             message: "Hello from Edge Runtime!",
             hasCtx: !!ctx,
-            envKeys: ctx?.env ? Object.keys(ctx.env) : []
+            envKeys: ctx?.env ? Object.keys(ctx.env) : [],
+            dbStatus,
+            dbError
         }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
@@ -16,7 +33,7 @@ export async function GET() {
     } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         return new Response(JSON.stringify({
-            error: "getRequestContext failed",
+            error: "Generic failure in hello API",
             details: msg
         }), { status: 500 });
     }
