@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const isCloudflarePages = process.env.CF_PAGES === "1";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  /* config options here */
 };
 
 // PWAはローカル/通常運用だけON、CloudflareビルドではOFF
