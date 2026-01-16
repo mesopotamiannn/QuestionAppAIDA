@@ -7,34 +7,17 @@ export async function GET() {
         const ctx = getRequestContext();
         const db = ctx?.env?.DB;
 
-        let dbStatus = "Not Attempted";
-        let dbError = null;
-
-        if (db) {
-            try {
-                const res = await db.prepare('SELECT 1').first();
-                dbStatus = res ? "Connected (SELECT 1 Success)" : "Empty Result";
-
-                // テーブルの存在チェック
-                try {
-                    await db.prepare('SELECT 1 FROM questions LIMIT 1').run();
-                    dbStatus += " / Table 'questions' exists";
-                } catch (te) {
-                    dbStatus += " / Table 'questions' MISSING";
-                    dbError = te instanceof Error ? te.message : String(te);
-                }
-            } catch (e) {
-                dbStatus = "Connection Failed";
-                dbError = e instanceof Error ? e.message : String(e);
-            }
+        if (!db) {
+            return new Response(JSON.stringify({ error: "DB not found in hello API" }), { status: 500 });
         }
 
+        // api/questions と同じクエリを実行
+        const { results } = await db.prepare('SELECT * FROM questions ORDER BY created_at DESC').all();
+
         return new Response(JSON.stringify({
-            message: "Diagnostic API (Updated at 12:47 AM)",
-            hasCtx: !!ctx,
-            envKeys: ctx?.env ? Object.keys(ctx.env) : [],
-            dbStatus,
-            dbError
+            message: "Hello - Data Fetch Test",
+            count: results?.length || 0,
+            results: results // 生のデータをそのまま返す
         }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
@@ -42,7 +25,7 @@ export async function GET() {
     } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         return new Response(JSON.stringify({
-            error: "Generic failure in hello API",
+            error: "Data Fetch failed in hello API",
             details: msg
         }), { status: 500 });
     }
