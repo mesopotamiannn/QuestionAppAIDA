@@ -53,8 +53,19 @@ export async function POST(request: Request) {
         }
 
         const { categoryId, text, depth } = body;
+
+        // Validation: 必須チェック
         if (!categoryId || !text) {
             return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+        }
+
+        // Validation: 文字数制限 (5〜100文字)
+        const trimmedText = text.trim();
+        if (trimmedText.length < 5) {
+            return new Response(JSON.stringify({ error: 'Question is too short (min 5 characters)' }), { status: 400 });
+        }
+        if (trimmedText.length > 100) {
+            return new Response(JSON.stringify({ error: 'Question is too long (max 100 characters)' }), { status: 400 });
         }
 
         const ctx = getRequestContext();
@@ -72,7 +83,7 @@ export async function POST(request: Request) {
         ).bind(
             id,
             categoryId,
-            text,
+            trimmedText,
             depth || 'normal',
             'general',
             'pending',
@@ -83,7 +94,7 @@ export async function POST(request: Request) {
         const newQuestion = {
             id,
             categoryId,
-            text,
+            text: trimmedText,
             depth: depth || 'normal',
             rating: 'general',
             status: 'pending',

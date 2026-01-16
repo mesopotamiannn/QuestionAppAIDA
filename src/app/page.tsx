@@ -14,6 +14,7 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { AnswerMode } from '@/types'; // AnswerMode type
 import { syncQuestions } from '@/utils/db'; // Sync logic
+import HowToPlayModal from '@/components/HowToPlayModal';
 
 export default function Home() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function Home() {
   const [count, setCount] = useState<number>(10);
   const [is18Plus, setIs18Plus] = useState(false);
   const [showAgeCheck, setShowAgeCheck] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [answerMode, setAnswerMode] = useState<AnswerMode>('everyone'); // Default to everyone
 
   // Load persistence and sync
@@ -144,6 +146,11 @@ export default function Home() {
   return (
     <>
       <Header />
+      <div style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 100 }}>
+        <Button variant="secondary" size="small" onClick={() => setShowHowToPlay(true)} style={{ borderRadius: '20px', padding: '6px 16px', fontSize: '0.8rem', opacity: 0.9 }}>
+          💡 遊び方
+        </Button>
+      </div>
       <Container>
         <div className={styles.wrapper}>
           <section className={styles.section}>
@@ -264,9 +271,9 @@ export default function Home() {
             </Button>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <div style={{ textAlign: 'center', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <Link href="/submit" style={{ color: 'var(--primary)', fontSize: '0.9rem', textDecoration: 'underline' }}>
-              質問を投稿する
+              新しい質問を投稿する
             </Link>
           </div>
         </div>
@@ -283,6 +290,8 @@ export default function Home() {
           <Button variant="primary" onClick={confirmAge} fullWidth>はい</Button>
         </div>
       </Modal>
+
+      <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
     </>
   );
 }
