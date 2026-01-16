@@ -6,30 +6,31 @@
 
 ## Setup Steps
 
-1. **Push to GitHub**
-   Ensure your code is pushed to your GitHub repository.
+9. **Gitの同期（リセット後）**
+   リセットを行ったため、通常の `git push` は拒否されます。以下のコマンドで強制的にリモートを更新し、Cloudflare Pages のビルドをトリガーします。
+   ```bash
+   git push -f origin main
+   ```
 
-2. **Create Project on Cloudflare Pages**
-   - Go to Cloudflare Dashboard > Pages > Create a project > Connect to git
-   - Select your repository
+10. **Build Command 確認**
+    Cloudflare の「Build setting」で以下のようになっていることを確認してください。
+    - **Build command**: `npm run pages:build`
+    - **Build output directory**: `.vercel/output/static`
 
-3. **Build Settings**
-   - **Framework Preset**: Next.js
-   - **Build Command**: `npm run pages:build`
-   - **Build Output Directory**: `.vercel/output/static` (or `.vercel/output` depending on adapter version, usually defaults are fine with the preset)
-   
-   *Note: Using `@cloudflare/next-on-pages` allows us to run server-side logic on Cloudflare Workers.*
+11. **D1 Database のバインディング**
+    Cloudflare Pages の設定から D1 を紐付ける必要があります。
+    - **Settings** > **Functions** > **D1 database bindings**
+    - **Variable name**: `DB`
+    - **D1 database**: `question-app-db` を選択
 
-4. **Environment Variables**
-   - If you have any secrets, add them in Settings > Environment variables.
-   - For this project (Phase 6), no special env vars are required yet unless you added authentication.
-
-5. **Deploy**
-   - Click "Save and Deploy".
+12. **D1 スキーマの適用 (初回のみ)**
+    リモートのデータベースにテーブルを作成します。ローカルのターミナルで以下を実行してください。
+    ```bash
+    npx wrangler d1 execute question-app-db --remote --file=./d1/schema.sql
+    ```
 
 ## Troubleshooting
-- If the build fails on `next-pwa` errors, ensure the build command uses the correct flag or env vars.
-- `NODE_VERSION`: You might need to set this to `20` or higher in Environment variables if default is old.
+- **500 Internal Server Error**: D1 のバインディングが正しくないか、テーブルが作成されていない場合に発生します。上記の手順 11, 12 を再確認してください。
 
 ## Local Preview
 To preview the Cloudflare build locally:

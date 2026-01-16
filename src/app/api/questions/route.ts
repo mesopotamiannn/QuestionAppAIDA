@@ -12,7 +12,9 @@ export async function GET() {
         const { results } = await db.prepare('SELECT * FROM questions ORDER BY created_at DESC').all<Question>();
         return NextResponse.json(results);
     } catch (e) {
-        return NextResponse.json({ error: 'Failed to fetch questions' }, { status: 500 });
+        console.error('Fetch API Error:', e);
+        const msg = e instanceof Error ? e.message : String(e);
+        return NextResponse.json({ error: 'Failed to fetch questions', details: msg }, { status: 500 });
     }
 }
 
@@ -66,6 +68,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newQuestion);
     } catch (error) {
         console.error('Submit API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        const msg = error instanceof Error ? error.message : String(error);
+        return NextResponse.json({ error: 'Internal Server Error', details: msg }, { status: 500 });
     }
 }
