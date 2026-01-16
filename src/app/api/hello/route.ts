@@ -13,9 +13,18 @@ export async function GET() {
         if (db) {
             try {
                 const res = await db.prepare('SELECT 1').first();
-                dbStatus = res ? "Success" : "Empty Result";
+                dbStatus = res ? "Connected (SELECT 1 Success)" : "Empty Result";
+
+                // テーブルの存在チェック
+                try {
+                    await db.prepare('SELECT 1 FROM questions LIMIT 1').run();
+                    dbStatus += " / Table 'questions' exists";
+                } catch (te) {
+                    dbStatus += " / Table 'questions' MISSING";
+                    dbError = te instanceof Error ? te.message : String(te);
+                }
             } catch (e) {
-                dbStatus = "Failed";
+                dbStatus = "Connection Failed";
                 dbError = e instanceof Error ? e.message : String(e);
             }
         }
