@@ -12,8 +12,8 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { CATEGORIES, ADULT_CATEGORY } from '@/data/categories';
 import Link from 'next/link';
 import styles from './page.module.css';
-
 import { AnswerMode } from '@/types'; // AnswerMode type
+import { syncQuestions } from '@/utils/db'; // Sync logic
 
 export default function Home() {
   const router = useRouter();
@@ -25,14 +25,26 @@ export default function Home() {
   const [showAgeCheck, setShowAgeCheck] = useState(false);
   const [answerMode, setAnswerMode] = useState<AnswerMode>('everyone'); // Default to everyone
 
-  // Load persistence
+  // Load persistence and sync
   useEffect(() => {
-    const savedNames = localStorage.getItem('lastParticipants');
-    if (savedNames) {
+    // 1. D1 Sync
+    syncQuestions();
+
+    // 2. Load names with expiration (2 hours)
+    const PERSISTENCE_EXPIRY = 2 * 60 * 60 * 1000; // 2 hours
+    const saved = localStorage.getItem('lastParticipantsData');
+
+    if (saved) {
       try {
-        const parsed = JSON.parse(savedNames);
-        if (Array.isArray(parsed) && parsed.length >= 2) {
-          setNames(parsed);
+        const { names: savedNames, updatedAt } = JSON.parse(saved);
+        const age = Date.now() - updatedAt;
+
+        if (age < PERSISTENCE_EXPIRY) {
+          if (Array.isArray(savedNames) && savedNames.length >= 2) {
+            setNames(savedNames);
+          }
+        } else {
+          localStorage.removeItem('lastParticipantsData');
         }
       } catch (e) {
         console.error('Failed to parse saved names', e);
@@ -65,6 +77,11 @@ export default function Home() {
       const newNames = names.filter((_, i) => i !== index);
       setNames(newNames);
     }
+  };
+
+  const clearNames = () => {
+    setNames(['', '']);
+    localStorage.removeItem('lastParticipantsData');
   };
 
   const toggleCategory = (id: string) => {
@@ -102,8 +119,11 @@ export default function Home() {
       return;
     }
 
-    // Save names logic
-    localStorage.setItem('lastParticipants', JSON.stringify(names));
+    // Save names logic with timestamp
+    localStorage.setItem('lastParticipantsData', JSON.stringify({
+      names,
+      updatedAt: Date.now()
+    }));
 
     // Force 'everyone' if participants > 2 (though UI hides option)
     const finalMode = names.length > 2 ? 'everyone' : answerMode;
@@ -127,7 +147,10 @@ export default function Home() {
       <Container>
         <div className={styles.wrapper}>
           <section className={styles.section}>
-            <h2 className={styles.label}>参加者</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h2 className={styles.label}>参加者</h2>
+              <Button variant="ghost" size="small" onClick={clearNames}>クリア</Button>
+            </div>
             <div className={styles.nameList}>
               {names.map((name, i) => (
                 <div key={i} className={styles.nameRow}>

@@ -66,3 +66,27 @@ export const getSession = async (id: string): Promise<Session | undefined> => {
     const db = await initDB();
     return db.get('sessions', id);
 };
+
+export const syncQuestions = async (): Promise<void> => {
+    const db = await initDB();
+    try {
+        const res = await fetch('/api/questions');
+        if (!res.ok) throw new Error('Failed to fetch questions');
+        const remoteQuestions: Question[] = await res.json();
+
+        // 承認済みの質問のみを同期対象とする
+        const tx = db.transaction('questions', 'readwrite');
+        const store = tx.objectStore('questions');
+
+        for (const q of remoteQuestions) {
+            if (q.status === 'approved') {
+                await store.put(q);
+            }
+        }
+        await tx.done;
+        console.log('Questions synced successfully');
+    } catch (e) {
+        console.error('Failed to sync questions from D1', e);
+    }
+};
+

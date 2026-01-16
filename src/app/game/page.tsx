@@ -103,7 +103,11 @@ export default function GamePage() {
                         <Button fullWidth onClick={nextQuestion} size="large">
                             次へ
                         </Button>
+                        <Button variant="ghost" fullWidth onClick={() => router.push('/result')} style={{ marginTop: '0.5rem' }}>
+                            中断して終了する
+                        </Button>
                     </div>
+
                 </div>
             </Container>
 

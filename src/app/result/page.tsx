@@ -22,11 +22,16 @@ export default function ResultPage() {
                     const session = await getSession(sessionId);
                     if (session) {
                         const allQuestions = await getAllQuestions();
-                        const sessionValues = session.questionIds
+                        // 実際に表示された（現在のインデックスまでの）質問のみを表示
+                        // インデックスは0から始まるため、+1問分を取得対象とする
+                        const shownQuestionIds = session.questionIds.slice(0, session.currentQuestionIndex + 1);
+
+                        const sessionValues = shownQuestionIds
                             .map(id => allQuestions.find(q => q.id === id))
                             .filter((q): q is Question => !!q);
                         setHistory(sessionValues);
                     }
+
                 } catch (e) {
                     console.error('Failed to load session history', e);
                 }
