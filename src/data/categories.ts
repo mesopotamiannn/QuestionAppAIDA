@@ -13,7 +13,8 @@ export const CATEGORIES: Category[] = [
     { id: '9', name: '人間関係', description: '友人・家族との付き合い方' },
     { id: '10', name: '恋愛観（マイルド）', description: '理想の関係やタイプ' },
     { id: '11', name: '将来・夢', description: 'これからの目標や夢' },
-    { id: '12', name: '内面・深掘り', description: '普段話さない深い話' },
+    { id: '12', name: '家事・ライフスタイル', description: 'どういう生活を送っているか' },
+    { id: '13', name: '内面・深掘り', description: '普段話さない深い話' },
 ];
 
 // 18+カテゴリ (13番目)
