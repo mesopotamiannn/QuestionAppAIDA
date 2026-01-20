@@ -93,7 +93,7 @@ export default function GamePage() {
 
                         <Card className={styles.questionCard}>
                             <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold', marginBottom: '0.5rem', opacity: 0.8 }}>
-                                #{([...CATEGORIES, ADULT_CATEGORY].find(c => c.id === currentQuestion.categoryId)?.name || 'その他')}
+                                {([...CATEGORIES, ADULT_CATEGORY].find(c => c.id === currentQuestion.categoryId)?.name || 'その他')}
                             </div>
                             <p className={styles.questionText}>{currentQuestion.text}</p>
                         </Card>
