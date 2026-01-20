@@ -15,6 +15,7 @@ import styles from './page.module.css';
 import { AnswerMode } from '@/types'; // AnswerMode type
 import { syncQuestions } from '@/utils/db'; // Sync logic
 import HowToPlayModal from '@/components/HowToPlayModal';
+import { INITIAL_QUESTIONS } from '@/data/initialQuestions';
 
 export default function Home() {
   const router = useRouter();
@@ -211,6 +212,9 @@ export default function Home() {
                 <Button variant="ghost" size="small" onClick={selectAllCategories}>すべて</Button>
                 <Button variant="ghost" size="small" onClick={clearCategories}>クリア</Button>
               </div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#888', marginTop: '-0.25rem', marginBottom: '0.5rem' }}>
+              登録質問数: {INITIAL_QUESTIONS.length}問
             </div>
             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.75rem' }}>
               ※ 未選択の場合は全カテゴリから出題

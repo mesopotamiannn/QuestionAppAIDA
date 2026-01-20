@@ -21,13 +21,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Question App",
-  description: "会話促進型質問アプリ",
+  title: "AIDA",
+  description: "人と人の間をつなぐ会話促進型質問アプリ",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Question App",
+    title: "AIDA",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 

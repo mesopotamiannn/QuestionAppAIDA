@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { useGameSession } from '@/hooks/useGameSession';
 import { getClientId } from '@/types';
+import { CATEGORIES, ADULT_CATEGORY } from '@/data/categories';
 import styles from './page.module.css';
 
 export default function GamePage() {
@@ -91,6 +92,9 @@ export default function GamePage() {
                         </div>
 
                         <Card className={styles.questionCard}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold', marginBottom: '0.5rem', opacity: 0.8 }}>
+                                #{([...CATEGORIES, ADULT_CATEGORY].find(c => c.id === currentQuestion.categoryId)?.name || 'その他')}
+                            </div>
                             <p className={styles.questionText}>{currentQuestion.text}</p>
                         </Card>
 
